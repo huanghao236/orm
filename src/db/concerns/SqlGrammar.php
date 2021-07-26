@@ -62,6 +62,12 @@ trait SqlGrammar
         return $this->wrapValue($where['column']).' '.$operator.' '.'?';
     }
 
+
+    protected function whereRaws($where)
+    {
+        return $where['sql'];
+    }
+
     /**
      * 组装 from 部分
      * @return string
@@ -78,7 +84,7 @@ trait SqlGrammar
     protected function compileColumns()
     {
         if (empty($this->columns)){
-            $this->columns = '*';
+            return 'select *';
         }
         return 'select '.implode(',',$this->columns);
     }

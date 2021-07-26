@@ -2,6 +2,7 @@
 namespace Hao\db\concerns;
 
 use Hao\facade\Config;
+use Illuminate\Database\Query\Builder;
 
 trait Query
 {
@@ -25,6 +26,15 @@ trait Query
     public $from;
 
     /**
+     * 绑定参数类型
+     *
+     * @var array
+     */
+    public $bindings = [
+        'where' => []
+    ];
+
+    /**
      * 向查询中添加一个基本where子句
      * @param string $column
      * @param mixed $operator
@@ -43,6 +53,11 @@ trait Query
         $this->wheres[] = compact(
             'type', 'column', 'operator', 'value', 'boolean'
         );
+
+        if ($value) {
+            $this->addBinding($value, 'where');
+        }
+
         return $this;
     }
 
@@ -54,7 +69,7 @@ trait Query
      */
     public function whereRaw(string $sql,$boolean = 'and')
     {
-        $this->wheres[] = ['type' => 'raw', 'sql' => $sql, 'boolean' => $boolean];
+        $this->wheres[] = ['type' => 'raws', 'sql' => $sql, 'boolean' => $boolean];
         return $this;
     }
 
@@ -142,13 +157,35 @@ trait Query
 
     public function get()
     {
-        $sql = $this->toSql();
-        $this->sqlSelect($sql);
+        return $this->sqlImplement($this->toSql());
     }
 
 
     public function toSql()
     {
         return $this->compileSelect();
+    }
+
+
+    /**
+     * 向查询添加绑定参数
+     * @param  mixed  $value
+     * @param  string  $type
+     * @return $this
+     *
+     */
+    public function addBinding($value, $type = 'where')
+    {
+        if (! array_key_exists($type, $this->bindings)) {
+            throw new InvalidArgumentException("Invalid binding type: {$type}.");
+        }
+
+        if (is_array($value)) {
+            $this->bindings[$type] = array_values(array_merge($this->bindings[$type], $value));
+        } else {
+            $this->bindings[$type][] = $value;
+        }
+
+        return $this;
     }
 }

@@ -39,13 +39,25 @@ trait Connector
      */
     private $createPdo;
 
-
-    public function sqlSelect()
+    /**
+     * 执行SQL
+     * @param string $sql
+     * @return array
+     * @throws \Exception
+     */
+    public function sqlImplement(string $sql)
     {
-        
+        try {
+            $statement = $this->connect()->prepare($sql);
+            //为语句设置默认的获取模式
+            $statement->setFetchMode(PDO::FETCH_OBJ);
+            $this->bindValues($statement,$this->bindings);
+            $statement->execute();
+            return $statement->fetchAll();
+        }catch (\Exception $e){
+            throw $e;
+        }
     }
-
-
 
     /**
      * 连接数据库
@@ -78,6 +90,27 @@ trait Connector
             $this->createPdo = new PDO($dsn,$config['username'], $config['password'],$params);
         }
         return $this->createPdo;
+    }
+
+    /**
+     * 绑定参数
+     * @param object $statement
+     * @param $bindings
+     */
+    public function bindValues($statement, $bindings)
+    {
+        foreach ($bindings as $key => $value) {
+            if (is_array($value)){
+                $value = array_values($value);
+                foreach ($value as $k => $v){
+                    $statement->bindValue(
+                        is_string($k) ? $k : $k + 1,
+                        $v,
+                        is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR
+                    );
+                }
+            }
+        }
     }
 
 
