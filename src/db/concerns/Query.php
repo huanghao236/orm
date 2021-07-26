@@ -1,6 +1,8 @@
 <?php
 namespace Hao\db\concerns;
 
+use Hao\facade\Config;
+
 trait Query
 {
 
@@ -141,7 +143,7 @@ trait Query
     public function get()
     {
         $sql = $this->toSql();
-
+        $this->sqlSelect($sql);
     }
 
 

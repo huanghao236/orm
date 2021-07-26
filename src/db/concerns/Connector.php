@@ -9,6 +9,7 @@ trait Connector
 {
 
 
+
     /**
      * PDO连接参数
      * @var array
@@ -26,14 +27,76 @@ trait Connector
         PDO::ATTR_EMULATE_PREPARES  => false,
     ];
 
+    /**
+     * 数据库连接信息
+     * @var array
+     */
+    private $config;
 
+    /**
+     * 数据库连接实例
+     * @var PDO
+     */
+    private $createPdo;
+
+
+    public function sqlSelect()
+    {
+        
+    }
+
+
+
+    /**
+     * 连接数据库
+     * @throws \Exception
+     */
+    public function connect(): PDO
+    {
+        try {
+            if (empty($this->config)){
+                $this->config = config('database.connections.mysql');
+            }
+            // 连接参数
+            if (isset($this->config['params']) && is_array($this->config['params'])) {
+                $params = $this->config['params'] + $this->params;
+            } else {
+                $params = $this->params;
+            }
+            return $this->createPdo($this->parseDsn($this->config),$this->config,$params);
+        }catch (\Exception $e){
+            throw $e;
+        }
+    }
 
     /**
      * 创建数据库链接实例
      */
-    private function createPdo()
+    private function createPdo($dsn,$config,$params)
     {
-        //mysql:host=127.0.0.1;port=3306;dbname=wx;charset=utf8
-        return new PDO();
+        if (empty($this->createPdo)){
+            $this->createPdo = new PDO($dsn,$config['username'], $config['password'],$params);
+        }
+        return $this->createPdo;
+    }
+
+
+    /**
+     * 解析pdo连接的dsn信息
+     * @return string mysql:host=127.0.0.1;port=3306;dbname=wx;charset=utf8
+     */
+    protected function parseDsn($config)
+    {
+        if (!empty($config['hostport'])) {//端口号
+            $dsn = 'mysql:host=' . $config['hostname'] . ';port=' . $config['hostport'];
+        } else {
+            $dsn = 'mysql:host=' . $config['hostname'];
+        }
+        $dsn .= ';dbname=' . $config['database'];
+
+        if (!empty($this->config['charset'])) {
+            $dsn .= ';charset=' . $config['charset'];
+        }
+        return $dsn;
     }
 }
