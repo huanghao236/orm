@@ -141,7 +141,7 @@ trait Query
     public function get()
     {
         $sql = $this->toSql();
-        dd($sql);
+
     }
 
 
