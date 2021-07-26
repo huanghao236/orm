@@ -1,9 +1,10 @@
 <?php
 namespace Hao;
 
+use Hao\db\BaseQuery;
+
 abstract class Model
 {
-
     /**
      * 表名
      * @var string
@@ -11,14 +12,11 @@ abstract class Model
     protected $table;
 
 
-
-
-    public function __construct()
+    
+    public function query()
     {
-
+        return new BaseQuery($this->table);
     }
-
-
 
     /**
      * 获取不存在的动态方法
@@ -28,7 +26,11 @@ abstract class Model
      */
     public function __call(string $method, array $parameters)
     {
-        return $this->$method(...$parameters);
+        if (in_array($method, ['increment', 'decrement'])) {
+            return $this->$method(...$parameters);
+        }
+        $object = $this->query();
+        return $object->{$method}(...$parameters);
     }
 
     /**
