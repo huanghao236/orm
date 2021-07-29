@@ -20,6 +20,18 @@ abstract class Model
         return new Builder(new BaseQuery($this->table),$this);
     }
 
+
+    public function __get($key)
+    {
+        return $this->attributes[$key] ?? '';
+    }
+
+    public function __set($key, $value)
+    {
+        $this->attributes[$key] = $value;
+        return $this;
+    }
+
     /**
      * 获取不存在的动态方法
      * @param  string  $method
