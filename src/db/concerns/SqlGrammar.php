@@ -16,6 +16,7 @@ trait SqlGrammar
         'columns',
         'from',
         'wheres',
+        'limit',
 
 
     ];
@@ -89,6 +90,11 @@ trait SqlGrammar
         return 'select '.implode(',',$this->columns);
     }
 
+
+    protected function compileLimit()
+    {
+        return 'limit '.(int) $this->limit;
+    }
 
     protected function wrapValue($value)
     {

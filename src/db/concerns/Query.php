@@ -20,6 +20,12 @@ trait Query
     public $columns = [];
 
     /**
+     * limit
+     * @var string
+     */
+    public $limit;
+
+    /**
      * 查询的表
      * @var string
      */
@@ -154,6 +160,18 @@ trait Query
         return '这是having';
     }
 
+    public function take($value)
+    {
+        return $this->limit($value);
+    }
+
+
+    public function limit($value)
+    {
+        $this->limit = $value;
+
+        return $this;
+    }
 
     public function get()
     {

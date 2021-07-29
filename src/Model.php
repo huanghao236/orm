@@ -11,11 +11,13 @@ abstract class Model
      */
     protected $table;
 
+    public $attributes;
 
-    
-    public function query()
+    public $original;
+
+    protected function query()
     {
-        return new BaseQuery($this->table);
+        return new Builder(new BaseQuery($this->table),$this);
     }
 
     /**
@@ -29,8 +31,8 @@ abstract class Model
         if (in_array($method, ['increment', 'decrement'])) {
             return $this->$method(...$parameters);
         }
-        $object = $this->query();
-        return $object->{$method}(...$parameters);
+        
+        return $this->query()->{$method}(...$parameters);
     }
 
     /**
