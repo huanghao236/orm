@@ -49,6 +49,7 @@ trait Query
      */
     public function where(string $column,$operator = null,string $value = null,$boolean = 'and')
     {
+
         $type = 'Basic';
 
         if (is_null($value)){
@@ -79,6 +80,31 @@ trait Query
         return $this;
     }
 
+
+    /**
+     * 向查询中添加一个In条件
+     */
+    public function whereIn(string $column,$value)
+    {
+        $type = 'Ins';
+        $this->wheres[] = compact(
+            'type', 'column', 'operator', 'value', 'boolean'
+        );
+
+        if ($value) {
+            if (is_array($value)){
+                $this->addBinding($value, 'where');
+            }else{
+                $this->addBinding([$value], 'where');
+            }
+
+        }
+
+        return $this;
+    }
+
+
+
     public function orWhere()
     {
         return '这是orWhere';
@@ -87,11 +113,6 @@ trait Query
     public function orWhereRaw()
     {
         return '这是orWhereRaw';
-    }
-
-    public function whereIn()
-    {
-        return '这是whereIn';
     }
 
     public function whereBetween()

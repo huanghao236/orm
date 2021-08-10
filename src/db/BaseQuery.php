@@ -11,5 +11,4 @@ class BaseQuery
     {
         $this->from = $table;
     }
-    
 }

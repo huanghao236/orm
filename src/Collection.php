@@ -3,8 +3,11 @@
 
 namespace Hao;
 
+use ArrayAccess;
+use IteratorAggregate;
+use ArrayIterator;
 
-class Collection
+class Collection implements IteratorAggregate
 {
 
     protected $items = [];
@@ -24,5 +27,15 @@ class Collection
             return $items;
         }
         return (array) $items;
+    }
+
+    /**
+     * 获取项目的迭代器(迭代器：用于遍历对象中的属性)
+     * 使用IteratorAggregate接口实现getIterator()方法直接返回迭代器对象，获取遍历之后的对象信息
+     * @return ArrayIterator|\Traversable
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->items);
     }
 }

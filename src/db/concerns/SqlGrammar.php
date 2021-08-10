@@ -55,6 +55,11 @@ trait SqlGrammar
         return '';
     }
 
+    /**
+     * where条件
+     * @param $where
+     * @return string
+     */
     protected function whereBasic($where)
     {
 
@@ -63,10 +68,27 @@ trait SqlGrammar
         return $this->wrapValue($where['column']).' '.$operator.' '.'?';
     }
 
-
+    /**
+     * 原生SQL条件
+     * @param $where
+     * @return mixed
+     */
     protected function whereRaws($where)
     {
         return $where['sql'];
+    }
+
+    /**
+     * In查询条件
+     * @param $where
+     * @return mixed
+     */
+    protected function whereIns($where)
+    {
+        if (!is_array($where['value'])){
+            $where['value'] = [$where['value']];
+        }
+        return $this->wrapValue($where['column']).' in ('.$this->parameterize($where['value']).')';
     }
 
     /**
@@ -98,8 +120,18 @@ trait SqlGrammar
 
     protected function wrapValue($value)
     {
+
         if ($value !== '*') {
-            return '`'.$value.'`';
+            if (strpos($value, '.') === false){
+                return '`'.$value.'`';
+            }else{
+                $value = explode('.',$value);
+                $arr = [];
+                foreach ($value as $val){
+                    $arr[] = '`'.$val.'`';
+                }
+                $value = implode('.',$arr);
+            }
         }
         return $value;
     }
@@ -114,5 +146,15 @@ trait SqlGrammar
     protected function removeLeadingBoolean($value)
     {
         return preg_replace('/and |or /i', '', $value, 1);
+    }
+
+    public function parameterize(array $values)
+    {
+        return implode(', ', array_map([$this, 'parameter'], $values));
+    }
+
+    protected function parameter()
+    {
+        return '?';
     }
 }

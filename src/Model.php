@@ -5,6 +5,7 @@ use Hao\db\BaseQuery;
 
 abstract class Model
 {
+    use Concerns\HasRelationships;
     /**
      * 表名
      * @var string
@@ -15,9 +16,19 @@ abstract class Model
 
     public $original;
 
+    public $relations;
+
     protected function query()
     {
         return new Builder(new BaseQuery($this->table),$this);
+    }
+
+
+    public function newFromBuilder($attributes = [])
+    {
+        $model = new static();
+        $model->attributes = $model->original = $attributes;
+        return $model;
     }
 
 
