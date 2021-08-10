@@ -34,7 +34,7 @@ abstract class Model
 
     public function __get($key)
     {
-        return $this->attributes[$key] ?? '';
+        return $this->attributes[$key] ?? $this->relations[$key] ?? $this->{$key}()->get() ?? '';
     }
 
     public function __set($key, $value)
