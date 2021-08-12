@@ -4,10 +4,11 @@
 namespace Hao;
 
 use ArrayAccess;
+use Hao\Concerns\Arrayable;
 use IteratorAggregate;
 use ArrayIterator;
 
-class Collection implements IteratorAggregate
+class Collection implements IteratorAggregate,Arrayable
 {
 
     protected $items = [];
@@ -37,5 +38,16 @@ class Collection implements IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this->items);
+    }
+
+    /**
+     * 对象转数组
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return array_map(function ($value) {
+            return $value instanceof Arrayable ? $value->toArray() : $value;
+        }, $this->items);
     }
 }

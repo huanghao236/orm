@@ -1,9 +1,10 @@
 <?php
 namespace Hao;
 
+use Hao\Concerns\Arrayable;
 use Hao\db\BaseQuery;
 
-abstract class Model
+abstract class Model implements Arrayable
 {
     use Concerns\HasRelationships;
     /**
@@ -31,9 +32,28 @@ abstract class Model
         return $model;
     }
 
+    /**
+     * 对象转数组
+     */
+    public function toArray()
+    {
+        $item = [];
+        // 合并关联数据
+        $data = array_merge($this->attributes, $this->relations);
+        foreach ($data as $k => $v){
+            if ($v instanceof Arrayable){
+                $item[$k] = $v->toArray();
+            }else{
+                $item[$k] = $v;
+            }
+        }
+        return $item;
+    }
+
 
     public function __get($key)
     {
+
         return $this->attributes[$key] ?? $this->relations[$key] ?? $this->{$key}()->get() ?? '';
     }
 
