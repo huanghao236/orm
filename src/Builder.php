@@ -40,11 +40,19 @@ class Builder
     public function get()
     {
         $items = $this->query->get();
-        return new Collection(array_map(function ($item) use ($items) {
-            $model = $this->model->newFromBuilder((array) $item);
-            $model->relations = $this->getRelations($model);
-            return $model;
-        }, $items));
+        if ($items && $this->eagerLoad){
+            $this->model->items = (array) $items;
+            $models = array_map(function ($item) use ($items) {
+                $model = $this->model->newFromBuilder((array) $item);
+                return $model;
+            }, $items);
+            return new Collection($this->getRelations($this->model,'get',$models));
+        }else{
+            return new Collection(array_map(function ($item) use ($items) {
+                $model = $this->model->newFromBuilder((array) $item);
+                return $model;
+            }, $items));
+        }
     }
 
 
@@ -57,8 +65,9 @@ class Builder
         $items = $this->query->take(1)->get();
         $item = !empty($items) ? reset($items) : null;
         $this->model->attributes = $this->model->original = (array) $item;
-        if ($item){
-            $this->model->relations = $this->getRelations($this->model);
+        if ($item && $this->eagerLoad){
+            $this->model->items = (array) $item;
+            $this->model->relations = $this->getRelations($this->model,'first');
         }
         return $this->model;
     }
@@ -77,21 +86,42 @@ class Builder
      */
     public function insert()
     {
-        
+
     }
 
     /**
      * 获取关联查询数据
      */
-    public function getRelations($model)
+    public function getRelations($thisModel,$selectType,$models = [])
     {
-        $relations = [];
+
         foreach ($this->eagerLoad as $name => $constraints){
-            $relation = $model->{$name}();
+            //执行hasOne或hasMany方法
+            $relation = $thisModel->{$name}();
+            //执行查询语句中的匿名方法
             $constraints($relation);
-            $relations[$name] = $relation->get();
+            //将关联查询字段数据相同的集合在一起
+            $dictionary = $thisModel->buildDictionary($relation->get());
+            if ($selectType == 'get'){
+                foreach ($models as $model){
+                    if (isset($dictionary[$model->{$thisModel->localKey}])){
+                        $model->relations[$name] = $this->getRelationValue($thisModel->type,$dictionary,$model->{$thisModel->localKey});
+                    }
+                }
+            }else{
+                $models[$name] = $this->getRelationValue($thisModel->type,$dictionary,$thisModel->{$thisModel->localKey});
+            }
         }
-        return $relations;
+        return $models;
+    }
+
+    /**
+     * 通过一种或多种的类型，获取关系的值
+     */
+    public function getRelationValue($type,$dictionary,$key)
+    {
+        $value = $dictionary[$key];
+        return $type === 'one' ? reset($value) : new Collection($value);
     }
 
     public function __call(string $method, array $parameters)

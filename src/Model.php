@@ -19,6 +19,8 @@ abstract class Model implements Arrayable
 
     public $relations;
 
+    public $items;
+
     protected function query()
     {
         return new Builder(new BaseQuery($this->table),$this);
@@ -39,7 +41,7 @@ abstract class Model implements Arrayable
     {
         $item = [];
         // 合并关联数据
-        $data = array_merge($this->attributes, $this->relations);
+        $data = array_merge($this->attributes ?? [], $this->relations ?? []);
         foreach ($data as $k => $v){
             if ($v instanceof Arrayable){
                 $item[$k] = $v->toArray();
@@ -53,7 +55,6 @@ abstract class Model implements Arrayable
 
     public function __get($key)
     {
-
         return $this->attributes[$key] ?? $this->relations[$key] ?? $this->{$key}()->get() ?? '';
     }
 

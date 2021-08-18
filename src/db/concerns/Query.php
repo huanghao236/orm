@@ -84,7 +84,7 @@ trait Query
     /**
      * 向查询中添加一个In条件
      */
-    public function whereIn(string $column,$value)
+    public function whereIn(string $column,$value,$boolean = 'and')
     {
         $type = 'Ins';
         $this->wheres[] = compact(

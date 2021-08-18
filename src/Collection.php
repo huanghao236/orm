@@ -50,4 +50,25 @@ class Collection implements IteratorAggregate,Arrayable
             return $value instanceof Arrayable ? $value->toArray() : $value;
         }, $this->items);
     }
+
+    /**
+     * 将关联查询字段数据相同的集合在一起
+     */
+    public function mapToDictionary(callable $callback)
+    {
+        $data = [];
+        foreach ($this->items as $key => $val){
+            //执行匿名函数，返回指定键名对应的值
+            $arr = $callback($val);
+            $k = key($arr);
+            //获取数组内部指针为第一个的数组
+            $value = reset($arr);
+            //若不存在这个键名，则赋予空数组
+            if (!isset($data[$k])){
+                $data[$k] = [];
+            }
+            $data[$k][] = $value;
+        }
+        return $data;
+    }
 }
