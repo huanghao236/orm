@@ -221,6 +221,15 @@ trait Query
     }
 
     /**
+     * 删除
+     */
+    public function delete()
+    {
+        return $this->sqlImplement($this->compileDelete(),'delete');
+    }
+
+
+    /**
      * 向查询添加绑定参数
      * @param  mixed  $value
      * @param  string  $type

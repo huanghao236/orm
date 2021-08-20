@@ -103,6 +103,15 @@ trait SqlGrammar
         return "insert into {$this->wrapValue($this->from)} {$compileKey} value {$compileValue}";
     }
 
+    /**
+     * 组装delete语句
+     */
+    public function compileDelete()
+    {
+        $where = $this->compileWheres();
+        return "delete from {$this->wrapValue($this->from)} {$where}";
+    }
+
 
     /**
      * 组装 where 条件

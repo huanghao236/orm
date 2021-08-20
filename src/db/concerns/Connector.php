@@ -56,8 +56,11 @@ trait Connector
             $statement->execute();
             if ($sqlType == 'select'){
                 return $statement->fetchAll();
-            }elseif($sqlType == 'update'){
-                return true;
+            }elseif($sqlType == 'update' || $sqlType == 'delete'){
+                if ($statement->rowCount() > 0){
+                    return true;
+                }
+                return false;
             }else{
                 return $this->connect()->lastInsertId();
             }

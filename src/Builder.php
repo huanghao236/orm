@@ -99,6 +99,23 @@ class Builder
     }
 
     /**
+     * 新增数据
+     */
+    public function insert($values)
+    {
+        return $this->query->insert($values);
+    }
+
+    /**
+     * 删除数据
+     * @return mixed
+     */
+    public function delete()
+    {
+        return $this->query->delete();
+    }
+
+    /**
      * 通过一种或多种的类型，获取关系的值
      */
     public function getRelationValue($type,$dictionary,$key)
