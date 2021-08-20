@@ -72,23 +72,6 @@ class Builder
         return $this->model;
     }
 
-
-    /**
-     * 更新数据
-     */
-    public function update()
-    {
-
-    }
-
-    /**
-     * 新增数据
-     */
-    public function insert()
-    {
-
-    }
-
     /**
      * 获取关联查询数据
      */

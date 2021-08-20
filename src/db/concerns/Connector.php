@@ -45,15 +45,22 @@ trait Connector
      * @return array
      * @throws \Exception
      */
-    public function sqlImplement(string $sql)
+    public function sqlImplement(string $sql,$sqlType)
     {
+
         try {
             $statement = $this->connect()->prepare($sql);
             //为语句设置默认的获取模式
             $statement->setFetchMode(PDO::FETCH_OBJ);
             $this->bindValues($statement,$this->bindings);
             $statement->execute();
-            return $statement->fetchAll();
+            if ($sqlType == 'select'){
+                return $statement->fetchAll();
+            }elseif($sqlType == 'update'){
+                return true;
+            }else{
+                return $this->connect()->lastInsertId();
+            }
         }catch (\Exception $e){
             throw $e;
         }
@@ -99,15 +106,17 @@ trait Connector
      */
     public function bindValues($statement, $bindings)
     {
+        $ke = 0;
         foreach ($bindings as $key => $value) {
-            if (is_array($value)){
+            if (is_array($value) && $value){
                 $value = array_values($value);
                 foreach ($value as $k => $v){
                     $statement->bindValue(
-                        is_string($k) ? $k : $k + 1,
+                        is_string($k) ? $k : $ke + 1,
                         $v,
                         is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR
                     );
+                    $ke++;
                 }
             }
         }

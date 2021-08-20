@@ -37,6 +37,7 @@ trait Query
      * @var array
      */
     public $bindings = [
+        'set' => [],
         'where' => []
     ];
 
@@ -49,7 +50,6 @@ trait Query
      */
     public function where(string $column,$operator = null,string $value = null,$boolean = 'and')
     {
-
         $type = 'Basic';
 
         if (is_null($value)){
@@ -194,17 +194,31 @@ trait Query
         return $this;
     }
 
+    /**
+     * 查询
+     * @return mixed
+     */
     public function get()
     {
-        return $this->sqlImplement($this->toSql());
+        return $this->sqlImplement($this->compileSelect(),'select');
     }
 
-
-    public function toSql()
+    /**
+     * 修改
+     * @param array $value
+     */
+    public function update(array $value)
     {
-        return $this->compileSelect();
+        return $this->sqlImplement($this->compileUpdate($value),'update');
     }
 
+    /**
+     * 新增
+     */
+    public function insert(array $value)
+    {
+        return $this->sqlImplement($this->compileInsert($value),'insert');
+    }
 
     /**
      * 向查询添加绑定参数

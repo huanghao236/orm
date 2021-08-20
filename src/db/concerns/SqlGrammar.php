@@ -40,6 +40,71 @@ trait SqlGrammar
     }
 
     /**
+     * 将update编译成SQL语句
+     */
+    public function compileUpdate($values)
+    {
+        $where = $this->compileWheres();
+        $compile = '';
+        foreach ($values as $key => $value){
+            if ($compile){
+                $compile .= ','.$this->wrapValue($key).' = ?';
+            }else{
+                $compile = $this->wrapValue($key).' = ?';
+            }
+            $this->bindings['set'][] = $value;
+        }
+        return "update {$this->wrapValue($this->from)} set {$compile} {$where}";
+    }
+
+    /**
+     * 将Insert编译成SQL语句
+     */
+    public function compileInsert($values)
+    {
+        //组装insert value部分
+        $compileValue = '';
+        foreach ($values as $key => $value){
+            if (is_array($value)){
+                $value = array_values($value);
+                if ($compileValue){
+                    $compileValue .= ',('.$this->parameterize($value).')';
+                }else{
+                    $compileValue = '('.$this->parameterize($value).')';
+                }
+                $this->bindings['insert'][] = $value;
+            }else{
+                if ($compileValue){
+                    $compileValue .= ',?';
+                }else{
+                    $compileValue .= '(?';
+                }
+                $this->bindings['insert'][] = $value;
+            }
+        }
+
+        //组装insert 字段部分
+        if (count($values) == count($values, 1)){
+            $Keys = array_keys($values);
+            $compileValue = $compileValue.')';
+        }else{
+            $Keys = array_keys($values[0]);
+        }
+        $compileKey = '';
+        foreach ($Keys as $v){
+            if ($compileKey){
+                $compileKey .= ','.$this->wrapValue($v);
+            }else{
+                $compileKey .= $this->wrapValue($v);
+            }
+        }
+        $compileKey = '('.$compileKey.')';
+
+        return "insert into {$this->wrapValue($this->from)} {$compileKey} value {$compileValue}";
+    }
+
+
+    /**
      * 组装 where 条件
      * @return array
      */

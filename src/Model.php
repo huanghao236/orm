@@ -52,6 +52,27 @@ abstract class Model implements Arrayable
         return $item;
     }
 
+    /**
+     * 更新或者新增数据
+     */
+    public function save()
+    {
+        $query = new BaseQuery($this->table);
+        if ($this->original){
+            if (!isset($this->attributes['id'])){
+                return true;
+            }else{
+                $value = $this->attributes;
+                unset($value['id']);
+                $this->original = $this->attributes;
+                return $query->where('id',$this->attributes['id'])->update($value);
+            }
+        }else{
+            //返回自增的主键值
+            return $query->insert($this->attributes);
+        }
+    }
+
 
     public function __get($key)
     {
