@@ -21,6 +21,8 @@ abstract class Model implements Arrayable
 
     public $items;
 
+    public $defaultKey = 'id';
+
     protected function query()
     {
         return new Builder(new BaseQuery($this->table),$this);
@@ -59,13 +61,13 @@ abstract class Model implements Arrayable
     {
         $query = new BaseQuery($this->table);
         if ($this->original){
-            if (!isset($this->attributes['id'])){
+            if (!isset($this->attributes[$this->defaultKey])){
                 return true;
             }else{
                 $value = $this->attributes;
-                unset($value['id']);
+                unset($value[$this->defaultKey]);
                 $this->original = $this->attributes;
-                return $query->where('id',$this->attributes['id'])->update($value);
+                return $query->where($this->defaultKey,$this->attributes[$this->defaultKey])->update($value);
             }
         }else{
             //返回自增的主键值
